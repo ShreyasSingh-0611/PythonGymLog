@@ -3,9 +3,9 @@ import pandas as pd
 
 def fetch_filepath():
     return {
-            "session": "data\session.csv",
-            "log": "data\log.csv",
-            "exercise": "data\exercise.csv"
+            "session": "session.csv",
+            "log": "log.csv",
+            "exercise": "exercise.csv"
         }
 
 
