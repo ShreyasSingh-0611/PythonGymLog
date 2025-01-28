@@ -1,9 +1,9 @@
 LogID,SessionID,ExerciseName,SetOrder,Reps,Weight,NumberOfSets
-1,1,Pushups,1,10,0.0,2
-2,1,Pushups,2,7,0.0,2
-3,1,Pullups,1,10,0.0,2
-4,2,Pushups,1,10,0.0,2
-5,3,Pullups,1,50,0.0,1
-6,4,pullups,1,50,0.0,2
-7,5,Pullups,1,50,0.0,2
-8,3,Pullups,1,50,0.0,2
+1,1,Squat,1,10,0.0,2
+2,1,Squat,2,7,0.0,2
+3,1,Pull-up,1,10,0.0,2
+4,2,Squat,1,10,0.0,2
+5,3,Pull-up,1,50,0.0,1
+6,4,Pull-up,1,50,0.0,2
+7,5,Pull-up,1,50,0.0,2
+8,3,Pull-up,1,50,0.0,2
