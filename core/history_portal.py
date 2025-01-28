@@ -1,7 +1,9 @@
 import pandas as pd
-from datetime import datetime
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 from core.data_manager import fetch_filepath, load_data
 
+# Data Filters
 
 def filter_session_by_user(data: pd.DataFrame, user: int):
     filtered_df = data[
@@ -30,7 +32,9 @@ def filter_log_by_session(data: pd.DataFrame, session_id: int):
     return filtered_df
 
 
-def display_session_history(display_session_data: pd.DataFrame, display_log_data):
+# Data display as text
+
+def display_session_history(display_session_data: pd.DataFrame, display_log_data: pd.DataFrame):
 
     def display_duration(start_time: datetime, end_time: datetime):
         dur = end_time - start_time
@@ -57,6 +61,38 @@ def display_session_history(display_session_data: pd.DataFrame, display_log_data
             if row["SetOrder"] == 1:
                 print(f'---{row["ExerciseName"]}---')
             print(f'{row["SetOrder"]}. {row["Weight"]}kg X {row["Reps"]} reps X {row["NumberOfSets"]} sets')
+
+
+# Data display by plots
+
+def plot_sessions_last_week(data):
+    data["SessionDatetime"] = pd.to_datetime(data["Starttime"])
+    today = datetime.now().date()
+    one_week_ago = today - timedelta(days=6)
+    last_week_data = data[
+        (data["SessionDatetime"].dt.date >= one_week_ago) &
+        (data["SessionDatetime"].dt.date <= today)
+        ]
+
+    last_week_dates = [one_week_ago + timedelta(days=i) for i in range(7)]
+    last_week_dates_str = [date.strftime("%Y-%m-%d") for date in last_week_dates]
+    session_counts = last_week_data["SessionDatetime"].dt.date.value_counts()
+    sessions_per_day = {date: session_counts.get(date, 0) for date in last_week_dates}
+    sorted_sessions = dict(sorted(sessions_per_day.items()))
+
+    # Plot the bar chart
+    plt.figure(figsize=(10, 6))
+    plt.bar(sorted_sessions.keys(), sorted_sessions.values(), color="skyblue", edgecolor="none")
+    plt.title("Number of Sessions Per Day (Last Week)", fontsize=14)
+    plt.xlabel("Date", fontsize=12)
+    plt.ylabel("Number of Sessions", fontsize=12)
+    plt.xticks(rotation=45)
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
+
+# Main function of history portal
 
 
 def history_menu(user_id: int):
