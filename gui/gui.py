@@ -21,11 +21,11 @@ def open_add_session_window():
 
     # Add Exercise Button (currently no functionality)
     add_exercise_button = tk.Button(add_session_window, text="Add Exercise")
-    add_exercise_button.grid(row=3, column=1, padx=10, pady=10)
+    add_exercise_button.grid(row=3, column=0, padx=10, pady=10)
 
     # Save Session Button (initially hidden)
     save_session_button = tk.Button(add_session_window, text="Save Session")
-    save_session_button.grid(row=4, column=1, padx=10, pady=10)
+    save_session_button.grid(row=4, column=0, padx=10, pady=10)
     save_session_button.grid_remove()  # Hide initially
 
     # Cancel Session Button
