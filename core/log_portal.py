@@ -2,6 +2,7 @@ from datetime import datetime
 #from connector import save_session
 from core.data_manager import backup_sessions
 
+#Function to navigate through portal
 
 def log_menu(user_id):
     print("\n---Log portal---")
