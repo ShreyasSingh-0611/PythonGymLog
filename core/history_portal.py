@@ -1,35 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
-from core.data_manager import fetch_filepath, load_data
-
-# Data Filters
-
-def filter_session_by_user(data: pd.DataFrame, user: int):
-    filtered_df = data[
-        data["userID"] == user
-    ]
-    return filtered_df
-
-
-def filter_session_by_date(data: pd.DataFrame):
-    def enter_date(txt):
-        date_entry = input(f'enter {txt} date as YYYY-MM-DD: ')
-
-        return date_entry
-    data["SessionDatetime"] = pd.to_datetime(data["Starttime"])
-    start_date = enter_date('starting')
-    end_date = enter_date('ending')
-    filtered_df = data[
-        (start_date <= data["SessionDatetime"]) &
-        (data["SessionDatetime"] <= end_date)
-        ]
-    return filtered_df
-
-
-def filter_log_by_session(data: pd.DataFrame, session_id: int):
-    filtered_df = data[data["SessionID"] == session_id]
-    return filtered_df
+from core.data_manager import fetch_filepath, load_data,filter_session_by_user,filter_session_by_date,filter_log_by_session
+from core.graphs import bar_sessions_by_date,bar_number_of_sets_per_exercise,plot_max_weight_by_session_date
 
 
 # Data display as text
@@ -63,36 +36,7 @@ def display_session_history(display_session_data: pd.DataFrame, display_log_data
             print(f'{row["SetOrder"]}. {row["Weight"]}kg X {row["Reps"]} reps X {row["NumberOfSets"]} sets')
 
 
-# Data display by plots
-
-def plot_sessions_last_week(data):
-    data["SessionDatetime"] = pd.to_datetime(data["Starttime"])
-    today = datetime.now().date()
-    one_week_ago = today - timedelta(days=6)
-    last_week_data = data[
-        (data["SessionDatetime"].dt.date >= one_week_ago) &
-        (data["SessionDatetime"].dt.date <= today)
-        ]
-
-    last_week_dates = [one_week_ago + timedelta(days=i) for i in range(7)]
-    last_week_dates_str = [date.strftime("%Y-%m-%d") for date in last_week_dates]
-    session_counts = last_week_data["SessionDatetime"].dt.date.value_counts()
-    sessions_per_day = {date: session_counts.get(date, 0) for date in last_week_dates}
-    sorted_sessions = dict(sorted(sessions_per_day.items()))
-
-    # Plot the bar chart
-    plt.figure(figsize=(10, 6))
-    plt.bar(sorted_sessions.keys(), sorted_sessions.values(), color="skyblue", edgecolor="none")
-    plt.title("Number of Sessions Per Day (Last Week)", fontsize=14)
-    plt.xlabel("Date", fontsize=12)
-    plt.ylabel("Number of Sessions", fontsize=12)
-    plt.xticks(rotation=45)
-    plt.grid(axis="y", linestyle="--", alpha=0.7)
-    plt.tight_layout()
-    plt.show()
-
-
-# Main function of history portal
+# Function to navigate through History Portal
 
 
 def history_menu(user_id: int):
@@ -101,17 +45,31 @@ def history_menu(user_id: int):
     user_session_data = filter_session_by_user(session_data, user_id)
     log_data = load_data(filepaths["log"])
     print("\n---History portal---")
-    print("1.Show all sessions \n2.filter sessions by date\n3.Exit history portal")
-    choice = input("Enter: ")
-    if choice == "1":
-        display_session_history(user_session_data, log_data)
-        history_menu(user_id)
-    elif choice == "2":
-        filtered_session_data = filter_session_by_date(user_session_data)
-        display_session_history(filtered_session_data, log_data)
-        history_menu(user_id)
-    elif choice == "3":
-        print("\n---Exiting log menu---")
+    while True:
+        print("1.Show all sessions \n2.Filter sessions by date\n3.See Graphs\n4.Exit history portal")
+        choice = input("Enter: ")
+        if choice == "1":
+            display_session_history(user_session_data, log_data)
+            history_menu(user_id)
+        elif choice == "2":
+            filtered_session_data = filter_session_by_date(user_session_data)
+            display_session_history(filtered_session_data, log_data)
+            history_menu(user_id)
+        elif choice == "3":
+            print("Choose Graph. \n1.Sessions by Date\n2. Number of sets by Exercise\n3.")
+            selection = input("Enter:")
+            if selection == "1":
+                bar_sessions_by_date(user_session_data)
+            elif selection == "2":
+                bar_number_of_sets_per_exercise(log_data)
+            elif selection == "3":
+                exercise_name = input("Name Exercise")
+                plot_max_weight_by_session_date(exercise_name,log_data,session_data)
+        elif choice == "4":
+            print("\n---Exiting log menu---")
+            break
+        else:
+            print("Enter Valid amount")
 
 
 if __name__ == "__main__":
