@@ -1,10 +1,14 @@
 import tkinter as tk
+import pandas as pd
 from tkinter import messagebox
 from datetime import datetime,date
-from core.data_manager import backup_sessions
+from core.data_manager import backup_sessions,load_data,fetch_filepath
 # List of exercises (this can be expanded or replaced with a database)
 exercise_list = ["Push-up", "Squat", "Deadlift", "Lunge", "Pull-up", "Bench Press", "Plank", "Crunches", "Lat Pull-down", "Bicep Curls", "Overhead Tricep extensions", "Leg Curls", "Leg extensions"]
+filepath = fetch_filepath()
 
+session_data = load_data(filepath["session"])
+log_data = load_data(filepath["log"])
 
 # Function to switch between frames
 def show_frame(frame):
@@ -12,6 +16,7 @@ def show_frame(frame):
         f.pack_forget()
     frame.pack()
 
+#log_portal functions
 
 # Function to open the "Add Session" window
 def open_add_session_window():
@@ -105,7 +110,6 @@ def open_add_session_window():
                 }
                 for set_data in exercise["sets"] if set_data["save_var"].get() == 1
             ]
-        print("Session Saved:", session)
         backup_sessions(session)
         add_session_window.destroy()
 
@@ -172,6 +176,30 @@ def open_add_session_window():
         cancel_button = tk.Button(exercise_window, text="Cancel", command=exercise_window.destroy)
         cancel_button.pack()
 
+# history_portal_related_functions
+
+def show_all(log_data: pd.DataFrame, session_data: pd.DataFrame, output_frame: tk.Frame):
+    # Iterate over session_data using iterrows()
+    for index, row in session_data.iterrows():
+        # Create a frame for each session
+        session_frame = tk.Frame(output_frame, bd=2, relief="solid", padx=10, pady=10)
+        session_frame.pack(padx=10, pady=5, fill="x", expand=True)
+
+        # Create and pack Session Date label
+        session_date_label = tk.Label(session_frame, text=f"Session Date: {row['SessionDate']}")
+        session_date_label.pack(anchor="w")
+
+        # Create and pack Start Time label
+        start_time_label = tk.Label(session_frame, text=f"Start Time: {row['Starttime']}")
+        start_time_label.pack(anchor="w")
+
+        # Create and pack End Time label
+        end_time_label = tk.Label(session_frame, text=f"End Time: {row['Endtime']}")
+        end_time_label.pack(anchor="w")
+
+        # Create an empty frame for exercises (currently empty)
+        exercise_frame = tk.Frame(session_frame, bd=1, relief="solid", height=50, bg="lightgray")
+        exercise_frame.pack(pady=10, fill="x")
 
 # Initialize the root window
 root = tk.Tk()
@@ -188,7 +216,7 @@ menu.add_command(label="History Portal", command=lambda: show_frame(history_port
 start_page_frame = tk.Frame(root)
 log_portal_frame = tk.Frame(root)
 history_portal_frame = tk.Frame(root)
-
+graphs_portal_frame = tk.Frame(root)
 # Start page
 start_label = tk.Label(start_page_frame, text="Welcome to the Workout Log System!", font=("Arial", 16))
 start_label.pack(pady=50)
@@ -204,6 +232,35 @@ add_session_button.pack(pady=10)
 # History portal
 history_label = tk.Label(history_portal_frame, text="View your workout history here.", font=("Arial", 16))
 history_label.pack(pady=50)
+
+# Create the frame for buttons
+buttons_frame = tk.Frame(history_portal_frame)
+buttons_frame.pack(pady=20)
+
+# Create the "Show All" button
+show_all_button = tk.Button(buttons_frame, text="Show All", width=15, command=lambda: show_all(log_data, session_data, output_frame))
+show_all_button.grid(row=0, column=0, padx=10)
+
+# Create the frame for output
+canvas = tk.Canvas(root)
+canvas.pack(side="bottom",fill="both", expand=True)
+
+# Create a vertical scrollbar and link it to the canvas
+scrollbar = tk.Scrollbar(history_portal_frame, orient="vertical", command=canvas.yview)
+scrollbar.pack(side="right", fill="y")
+
+canvas.configure(yscrollcommand=scrollbar.set)
+
+# Create a frame inside the canvas that will contain all the content for output
+output_frame = tk.Frame(canvas)
+canvas.create_window((0, 0), window=output_frame, anchor="nw")
+
+# Update the scroll region whenever content is added
+output_frame.update_idletasks()
+canvas.config(scrollregion=canvas.bbox("all"))
+
+#Run the startingpage first
+start_page_frame.pack()
 
 # Run the application
 root.mainloop()
