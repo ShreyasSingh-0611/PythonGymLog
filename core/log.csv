@@ -1,9 +1,37 @@
 LogID,SessionID,ExerciseName,SetOrder,Reps,Weight,NumberOfSets
-1,1,Squat,1,10,0.0,2
-2,1,Squat,2,7,0.0,2
-3,1,Pull-up,1,10,0.0,2
-4,2,Squat,1,10,0.0,2
-5,3,Pull-up,1,50,0.0,1
-6,4,Pull-up,1,50,0.0,2
-7,5,Pull-up,1,50,0.0,2
-8,3,Pull-up,1,50,0.0,2
+1,1,Squat,1,10,20.0,2
+2,1,Squat,2,8,20.0,2
+3,1,Pull-up,1,8,0.0,2
+4,1,Pull-up,2,6,0.0,1
+5,2,Push-up,1,12,0.0,3
+6,2,Push-up,2,10,0.0,2
+7,3,Deadlift,1,10,40.0,2
+8,3,Deadlift,2,8,50.0,1
+9,3,Crunches,1,12,0.0,2
+10,4,Bench Press,1,10,30.0,2
+11,4,Bench Press,2,8,40.0,1
+12,4,Lat Pull-down,1,12,20.0,2
+13,5,Lunge,1,12,0.0,2
+14,5,Lunge,2,10,0.0,1
+15,5,Overhead Tricep extensions,1,10,10.0,2
+16,6,Leg Curls,1,12,25.0,2
+17,6,Leg Curls,2,10,30.0,1
+18,6,Leg extensions,1,12,20.0,2
+19,7,Plank,1,60,0.0,2
+20,7,Crunches,1,12,0.0,2
+21,8,Bicep Curls,1,10,15.0,2
+22,8,Bicep Curls,2,8,20.0,1
+23,9,Squat,1,10,25.0,2
+24,9,Squat,2,8,30.0,1
+25,10,Deadlift,1,10,45.0,2
+26,10,Deadlift,2,8,55.0,1
+27,11,Push-up,1,12,0.0,3
+28,11,Push-up,2,10,0.0,2
+29,12,Bench Press,1,10,35.0,2
+30,12,Bench Press,2,8,45.0,1
+31,13,Lat Pull-down,1,12,25.0,2
+32,13,Lat Pull-down,2,10,30.0,1
+33,14,Lunge,1,12,0.0,2
+34,14,Lunge,2,10,0.0,1
+35,15,Overhead Tricep extensions,1,10,12.0,2
+36,15,Overhead Tricep extensions,2,8,15.0,1
