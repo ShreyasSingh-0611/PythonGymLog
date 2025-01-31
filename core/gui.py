@@ -12,7 +12,7 @@ log_data = load_data(filepath["log"])
 
 # Function to switch between frames
 def show_frame(frame):
-    for f in [start_page_frame, log_portal_frame, history_portal_frame]:
+    for f in [start_page_frame, log_portal_frame, history_portal_frame,graphs_portal_frame]:
         f.pack_forget()
     frame.pack()
 
@@ -211,6 +211,7 @@ root.config(menu=menu)
 menu.add_command(label="Start Page", command=lambda: show_frame(start_page_frame))
 menu.add_command(label="Log Portal", command=lambda: show_frame(log_portal_frame))
 menu.add_command(label="History Portal", command=lambda: show_frame(history_portal_frame))
+menu.add_command(label="Graphs Portal", command=lambda: show_frame(graphs_portal_frame))
 
 # Create frames for each page
 start_page_frame = tk.Frame(root)
@@ -258,6 +259,10 @@ canvas.create_window((0, 0), window=output_frame, anchor="nw")
 # Update the scroll region whenever content is added
 output_frame.update_idletasks()
 canvas.config(scrollregion=canvas.bbox("all"))
+
+#graphs portal frame
+history_label = tk.Label(history_portal_frame, text="View your workout graphs here.", font=("Arial", 16))
+history_label.pack(pady=50)
 
 #Run the startingpage first
 start_page_frame.pack()
