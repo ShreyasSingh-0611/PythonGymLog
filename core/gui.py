@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from datetime import datetime
+from datetime import datetime,date
 from core.data_manager import backup_sessions
 # List of exercises (this can be expanded or replaced with a database)
 exercise_list = ["Push-up", "Squat", "Deadlift", "Lunge", "Pull-up", "Bench Press", "Plank", "Crunches", "Lat Pull-down", "Bicep Curls", "Overhead Tricep extensions", "Leg Curls", "Leg extensions"]
@@ -19,7 +19,7 @@ def open_add_session_window():
     add_session_window.title("Add Session")
     add_session_window.geometry("400x400")
 
-    session = {"exercises": [], "starttime": datetime.now(), "userID": 1}
+    session = {"exercises": [], "starttime": datetime.now(), "session_date":date.today(), "userID": 1}
 
     # Header Label
     header_label = tk.Label(add_session_window, text="Workout Session", font=("Arial", 16, "bold"))
