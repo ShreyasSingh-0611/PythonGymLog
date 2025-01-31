@@ -1,22 +1,27 @@
 import tkinter as tk
 import pandas as pd
 from tkinter import messagebox
-from datetime import datetime,date
-from core.data_manager import backup_sessions,load_data,fetch_filepath
+from datetime import datetime, date
+from core.data_manager import backup_sessions, load_data, fetch_filepath, filter_log_by_session
+from core.graphs import bar_sessions_by_date, bar_number_of_sets_per_exercise, plot_max_weight_by_session_date
 # List of exercises (this can be expanded or replaced with a database)
-exercise_list = ["Push-up", "Squat", "Deadlift", "Lunge", "Pull-up", "Bench Press", "Plank", "Crunches", "Lat Pull-down", "Bicep Curls", "Overhead Tricep extensions", "Leg Curls", "Leg extensions"]
-filepath = fetch_filepath()
+exercise_list = ["Push-up", "Squat", "Deadlift", "Lunge", "Pull-up", "Bench Press",
+                 "Plank", "Crunches", "Lat Pull-down", "Bicep Curls", "Overhead Tricep extensions",
+                 "Leg Curls", "Leg extensions"]
 
+filepath = fetch_filepath()
 session_data = load_data(filepath["session"])
 log_data = load_data(filepath["log"])
 
 # Function to switch between frames
+
 def show_frame(frame):
-    for f in [start_page_frame, log_portal_frame, history_portal_frame,graphs_portal_frame]:
+    for f in [start_page_frame, log_portal_frame, history_portal_frame, graphs_portal_frame]:
         f.pack_forget()
     frame.pack()
 
-#log_portal functions
+
+# log_portal functions
 
 # Function to open the "Add Session" window
 def open_add_session_window():
@@ -24,7 +29,7 @@ def open_add_session_window():
     add_session_window.title("Add Session")
     add_session_window.geometry("400x400")
 
-    session = {"exercises": [], "starttime": datetime.now(), "session_date":date.today(), "userID": 1}
+    session = {"exercises": [], "starttime": datetime.now(), "session_date": date.today(), "userID": 1}
 
     # Header Label
     header_label = tk.Label(add_session_window, text="Workout Session", font=("Arial", 16, "bold"))
@@ -93,6 +98,50 @@ def open_add_session_window():
 
         session["exercises"].append({"name": exercise_name, "sets": sets})
 
+    def open_exercise_window(add_exercise_callback):
+        exercise_window = tk.Toplevel()
+        exercise_window.title("Add Exercise")
+        exercise_window.geometry("400x300")
+        search_entry = tk.Entry(exercise_window, font=("Arial", 12))
+        search_entry.pack(pady=10)
+        exercise_listbox = tk.Listbox(exercise_window, height=10, font=("Arial", 12), width=30)
+        exercise_listbox.pack()
+        for exercise in exercise_list:
+            exercise_listbox.insert(tk.END, exercise)
+
+        def update_listbox(event):
+            search_term = search_entry.get().lower()
+            exercise_listbox.delete(0, tk.END)
+            for exercise in exercise_list:
+                if search_term in exercise.lower():
+                    exercise_listbox.insert(tk.END, exercise)
+
+        search_entry.bind("<KeyRelease>", update_listbox)
+
+        def fillout(event):
+            try:
+                selected_exercise = exercise_listbox.get(exercise_listbox.curselection())
+                search_entry.delete(0, tk.END)
+                search_entry.insert(0, selected_exercise)
+            except tk.TclError:
+                pass
+
+        exercise_listbox.bind("<<ListboxSelect>>", fillout)
+
+        def submit_exercise():
+            exercise_name = search_entry.get()
+            if exercise_name in exercise_list:
+                messagebox.showinfo("Exercise Added", f"{exercise_name} has been added to the session.")
+                add_exercise_callback(exercise_name)
+                exercise_window.destroy()
+            else:
+                messagebox.showerror("Error", "Exercise not found!")
+
+        submit_button = tk.Button(exercise_window, text="Submit", command=submit_exercise)
+        submit_button.pack()
+        cancel_button = tk.Button(exercise_window, text="Cancel", command=exercise_window.destroy)
+        cancel_button.pack()
+
     # Add Exercise Button
     add_exercise_button = tk.Button(buttons_frame, text="Add Exercise",
                                     command=lambda: open_exercise_window(add_exercise_to_session))
@@ -127,58 +176,11 @@ def open_add_session_window():
     cancel_session_button.pack()
 
 
-# Function to open the "Add Exercise" window
-    def open_exercise_window(add_exercise_callback):
-        exercise_window = tk.Toplevel()
-        exercise_window.title("Add Exercise")
-        exercise_window.geometry("400x300")
-
-        search_entry = tk.Entry(exercise_window, font=("Arial", 12))
-        search_entry.pack(pady=10)
-
-        exercise_listbox = tk.Listbox(exercise_window, height=10, font=("Arial", 12), width=30)
-        exercise_listbox.pack()
-
-        for exercise in exercise_list:
-            exercise_listbox.insert(tk.END, exercise)
-
-        def update_listbox(event):
-            search_term = search_entry.get().lower()
-            exercise_listbox.delete(0, tk.END)
-            for exercise in exercise_list:
-                if search_term in exercise.lower():
-                    exercise_listbox.insert(tk.END, exercise)
-
-        search_entry.bind("<KeyRelease>", update_listbox)
-
-        def fillout(event):
-            try:
-                selected_exercise = exercise_listbox.get(exercise_listbox.curselection())
-                search_entry.delete(0, tk.END)
-                search_entry.insert(0, selected_exercise)
-            except tk.TclError:
-                pass
-
-        exercise_listbox.bind("<<ListboxSelect>>", fillout)
-
-        def submit_exercise():
-            exercise_name = search_entry.get()
-            if exercise_name in exercise_list:
-                messagebox.showinfo("Exercise Added", f"{exercise_name} has been added to the session.")
-                add_exercise_callback(exercise_name)
-                exercise_window.destroy()
-            else:
-                messagebox.showerror("Error", "Exercise not found!")
-
-        submit_button = tk.Button(exercise_window, text="Submit", command=submit_exercise)
-        submit_button.pack()
-
-        cancel_button = tk.Button(exercise_window, text="Cancel", command=exercise_window.destroy)
-        cancel_button.pack()
-
 # history_portal_related_functions
 
+
 def show_all(log_data: pd.DataFrame, session_data: pd.DataFrame, output_frame: tk.Frame):
+    output_frame.pack_forget()
     # Iterate over session_data using iterrows()
     for index, row in session_data.iterrows():
         # Create a frame for each session
@@ -200,6 +202,17 @@ def show_all(log_data: pd.DataFrame, session_data: pd.DataFrame, output_frame: t
         # Create an empty frame for exercises (currently empty)
         exercise_frame = tk.Frame(session_frame, bd=1, relief="solid", height=50, bg="lightgray")
         exercise_frame.pack(pady=10, fill="x")
+        session_log_data = filter_log_by_session(log_data, row["SessionID"]).sort_values(by=["LogID"])
+        for j, log_row in log_data.iterrows():
+            if log_row["SetOrder"] == 1:
+                exercise_name_label = tk.Label(exercise_frame, text=log_row["ExerciseName"])
+                exercise_name_label.pack()
+            exercise_info_text = f'{log_row["SetOrder"]}.{log_row["Weight"]}kg X {log_row["Reps"]} reps X {log_row["NumberOfSets"]} sets'
+            exercise_info_label = tk.Label(exercise_frame, text=exercise_info_text)
+            exercise_info_label.pack()
+    output_frame.pack()
+
+# Function to choose Exercise for max weight
 
 # Initialize the root window
 root = tk.Tk()
@@ -218,6 +231,7 @@ start_page_frame = tk.Frame(root)
 log_portal_frame = tk.Frame(root)
 history_portal_frame = tk.Frame(root)
 graphs_portal_frame = tk.Frame(root)
+
 # Start page
 start_label = tk.Label(start_page_frame, text="Welcome to the Workout Log System!", font=("Arial", 16))
 start_label.pack(pady=50)
@@ -243,28 +257,25 @@ show_all_button = tk.Button(buttons_frame, text="Show All", width=15, command=la
 show_all_button.grid(row=0, column=0, padx=10)
 
 # Create the frame for output
-canvas = tk.Canvas(root)
-canvas.pack(side="bottom",fill="both", expand=True)
+output_frame = tk.Frame(history_portal_frame)
+output_frame.pack()
+# Graphs portal frame
+graph_label = tk.Label(graphs_portal_frame, text="View your workout graphs here.", font=("Arial", 16))
+graph_label.pack(pady=50)
 
-# Create a vertical scrollbar and link it to the canvas
-scrollbar = tk.Scrollbar(history_portal_frame, orient="vertical", command=canvas.yview)
-scrollbar.pack(side="right", fill="y")
+sessions_by_date_label = tk.Label(graphs_portal_frame, text="1.Sessions by date of last week")
+sessions_by_date_button = tk.Button(graphs_portal_frame, text="Show",
+                                    command=lambda: bar_sessions_by_date(session_data))
+sessions_by_date_label.pack()
+sessions_by_date_button.pack()
+number_of_sets_per_exercise_label = tk.Label(graphs_portal_frame, text="2.Number of sets per exercise")
+number_of_sets_per_exercise_button = tk.Button(graphs_portal_frame, text="Show",
+                                               command=lambda: bar_number_of_sets_per_exercise(log_data))
+number_of_sets_per_exercise_label.pack()
+number_of_sets_per_exercise_button.pack()
 
-canvas.configure(yscrollcommand=scrollbar.set)
 
-# Create a frame inside the canvas that will contain all the content for output
-output_frame = tk.Frame(canvas)
-canvas.create_window((0, 0), window=output_frame, anchor="nw")
-
-# Update the scroll region whenever content is added
-output_frame.update_idletasks()
-canvas.config(scrollregion=canvas.bbox("all"))
-
-#graphs portal frame
-history_label = tk.Label(history_portal_frame, text="View your workout graphs here.", font=("Arial", 16))
-history_label.pack(pady=50)
-
-#Run the startingpage first
+# Run the start page first
 start_page_frame.pack()
 
 # Run the application
