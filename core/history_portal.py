@@ -1,6 +1,5 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
+from datetime import datetime
 from core.data_manager import fetch_filepath, load_data,filter_session_by_user,filter_session_by_date,filter_log_by_session
 from core.graphs import bar_sessions_by_date,bar_number_of_sets_per_exercise,plot_max_weight_by_session_date
 
