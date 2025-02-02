@@ -1,0 +1,79 @@
+import tkinter as tk
+from tkinter import ttk
+import pandas as pd
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+def bar_number_of_sets_per_exercise():
+    df = pd.read_csv("log.csv")
+    df_sets = df.groupby("ExerciseName")["NumberOfSets"].sum()
+    figure = Figure(figsize=(5, 5), dpi=100)
+    ax = figure.add_subplot(111)
+    ax.bar(df_sets.index, df_sets.values)
+    ax.set_xlabel("Exercise")
+    ax.set_ylabel("Total Sets")
+    ax.set_title("Total Sets Performed for Each Exercise")
+    ax.tick_params(axis="x", rotation=90)
+    return figure
+
+def plot_max_weight_by_session_date(exercise_name):
+    log_df = pd.read_csv("log.csv")
+    session_df = pd.read_csv("session.csv")
+    log_df = log_df.merge(session_df[['SessionID', 'SessionDate']], on='SessionID')
+    df_exercise = log_df[log_df['ExerciseName'] == exercise_name]
+    df_max_weight = df_exercise.groupby('SessionDate')["Weight"].max().reset_index()
+
+    figure = Figure(figsize=(8, 5), dpi=100)
+    ax = figure.add_subplot(111)
+    ax.plot(df_max_weight['SessionDate'], df_max_weight['Weight'], marker='o', linestyle='-')
+    ax.set_xlabel('Session Date')
+    ax.set_ylabel('Max Weight (kg)')
+    ax.set_title(f'Max Weight for {exercise_name} Over Time')
+    ax.tick_params(axis="x", rotation=45)
+    ax.grid()
+    ax.set_ylim(ymin=0, ymax=(df_exercise["Weight"].max()) + 5.0)
+    return figure
+
+def display_graph(figure):
+    for widget in graphs_portal_frame.winfo_children():
+        if isinstance(widget, tk.Canvas):
+            widget.destroy()
+    canvas = FigureCanvasTkAgg(figure, graphs_portal_frame)
+    canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+    canvas.draw()
+
+# Initialize tkinter window
+root = tk.Tk()
+root.title("Fitness Tracker GUI with Graphs")
+root.geometry("800x600")
+
+# Create a notebook for tabs
+notebook = ttk.Notebook(root)
+notebook.pack(fill=tk.BOTH, expand=True)
+
+# Create frames for each tab
+main_frame = ttk.Frame(notebook)
+graphs_portal_frame = ttk.Frame(notebook)
+
+main_frame.pack(fill=tk.BOTH, expand=True)
+graphs_portal_frame.pack(fill=tk.BOTH, expand=True)
+
+# Add frames to notebook
+notebook.add(main_frame, text="Main")
+notebook.add(graphs_portal_frame, text="Graphs Portal")
+
+# Add content to main_frame
+welcome_label = tk.Label(main_frame, text="Welcome to the Fitness Tracker", font=("Arial", 16))
+welcome_label.pack(pady=20)
+
+# Add buttons to Graphs Portal
+bar_chart_button = tk.Button(graphs_portal_frame, text="Bar Chart: Sets Per Exercise",
+                             command=lambda: display_graph(bar_number_of_sets_per_exercise()))
+bar_chart_button.pack(pady=10)
+
+line_chart_button = tk.Button(graphs_portal_frame, text="Line Chart: Max Weight (Deadlift)",
+                              command=lambda: display_graph(plot_max_weight_by_session_date("Deadlift")))
+line_chart_button.pack(pady=10)
+
+# Run the tkinter event loop
+root.mainloop()
